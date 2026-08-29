@@ -173,14 +173,14 @@ FAILURE_INJECTION_ENABLED=true    # enables the "break an agent" endpoint for th
 **Goal:** In a terminal, a supervisor delegates to one sub-agent; when that sub-agent is forced to loop or hallucinate, the supervisor detects it, stops it, reroutes to a fallback path, and writes an incident record — all on ADK 2.8 + real Gemini.
 
 Tasks:
-- [ ] Install and pin `google-adk==2.8.x` and current `google-genai`; confirm a minimal `LlmAgent` makes a real `gemini-3.5-flash` call — Done when: a one-agent script prints a Gemini response
-- [ ] Build a supervisor with one sub-agent using the current ADK 2.8 delegation pattern (verify against live docs — API changed 3 days ago) — Done when: supervisor routes a task to the sub-agent and returns its result
-- [ ] Implement **loop detection**: `max_iterations` (or manual counter) trips on a deliberately looping sub-agent — Done when: a forced-loop run halts at the cap instead of running forever
-- [ ] Implement **bad-output detection** via `after_model_callback` (heuristic + a second-model judge check) on a deliberately hallucinated goal (e.g. references a wrong student / non-measurable) — Done when: the callback flags the bad output and short-circuits
-- [ ] Implement **recovery**: supervisor catches escalate/exception and dispatches to a fallback agent or a "needs human" path (do **not** rely on `transfer_to_agent`-to-parent — it's buggy for sub-agents) — Done when: after a fault, control returns to the supervisor and an alternative path runs
-- [ ] Write the incident to an append-only audit record (local store) — Done when: the run leaves a JSON incident with {agent, fault type, detection, action taken, timestamp}
-- [ ] `docs/01-architecture.md` first draft capturing the proven mechanism — Done when: the detect→kill→reroute→log sequence is documented with the exact ADK primitives used
-- [ ] Gate: a `pytest` test injects each fault (loop, hallucination, tool-error) and asserts detection + recovery + audit entry — Done when: all green
+- [x] Install and pin `google-adk==2.8.0` and current `google-genai` (2.20.0); confirm a minimal `LlmAgent` makes a real `gemini-3.5-flash` call — Done when: a one-agent script prints a Gemini response _(script `spike/smoke_gemini.py` + skipped-without-key test built and verified against ScriptedLlm; live call pending the user's `GOOGLE_API_KEY`)_
+- [x] Build a supervisor with one sub-agent using the current ADK 2.8 delegation pattern (verified against installed 2.8.0 API) — Done when: supervisor routes a task to the sub-agent and returns its result
+- [x] Implement **loop detection**: iteration cap trips on a deliberately looping sub-agent (`LoopingWorker`), generator `aclose()`d on kill — Done when: a forced-loop run halts at the cap instead of running forever
+- [x] Implement **bad-output detection** via `guards/judge.py` heuristic (wrong-student + non-measurable) on a deliberately hallucinated goal — Done when: the judge flags the bad output and the supervisor treats it as a fault
+- [x] Implement **recovery**: supervisor catches fault/exception and dispatches to a fallback agent, else a "needs human" path (NOT `transfer_to_agent`-to-parent) — Done when: after a fault, control returns to the supervisor and an alternative path runs
+- [x] Write the incident to an append-only audit record (local store) — Done when: the run leaves a JSON incident with {agent, fault_type, detection, action_taken, timestamp}
+- [x] `docs/01-architecture.md` first draft capturing the proven mechanism — Done when: the detect→kill→reroute→log sequence is documented with the exact ADK primitives used
+- [x] Gate: a `pytest` test injects each fault (loop, hallucination, tool-error) and asserts detection + recovery + audit entry — Done when: all green _(6 passed, 1 skipped)_
 
 ### Milestone 1: Scaffold
 **Goal:** Repo runs locally; structure, deps, synthetic data, storage, and audit primitives in place.

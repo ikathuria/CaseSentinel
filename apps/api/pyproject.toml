@@ -1,0 +1,24 @@
+[project]
+name = "casesentinel"
+version = "0.0.1"
+description = "Governed multi-agent IDEA special-education compliance watch"
+requires-python = ">=3.10"
+dependencies = [
+    "google-adk==2.8.0",
+    "google-genai>=2.20,<3",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

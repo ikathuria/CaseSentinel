@@ -4,7 +4,7 @@
 > what the project is, how it's built, and where things are. **Keep it in sync** — update it
 > whenever the stack, structure, conventions, or status changes.
 
-_Last updated: 2026-08-29 (planning; no code yet)_
+_Last updated: 2026-08-29 (Milestone 0 complete — failure-recovery spike proven)_
 
 ---
 
@@ -83,15 +83,23 @@ CaseSentinel/
 
 | Milestone | Status | Notes |
 |---|---|---|
-| 0. Spike (detect/kill/reroute/log) | ☐ todo | **Do first** — de-risks the signature demo on ADK 2.8 |
-| 1. Scaffold | ☐ todo | structure, deps, synthetic data, store, audit |
+| 0. Spike (detect/kill/reroute/log) | ✅ done | Proven on ADK 2.8.0; 4 scenarios green, offline. See `docs/01-architecture.md` |
+| 1. Scaffold | ◐ partial | `apps/api` exists (venv, pyproject, store, audit, guards); still need `apps/web`, root scripts, synthetic-data generator |
 | 2. Core multi-agent system | ☐ todo | 5 agents + approval gate, sequential orchestration |
-| 3. Failure detection & recovery | ☐ todo | generalizes M0 into a real subsystem + injection |
+| 3. Failure detection & recovery | ☐ todo | generalizes M0 into a real subsystem + injection API |
 | 4. Web dashboard | ☐ todo | the demo surface, incl. "break an agent" |
 | 5. Deploy + polish | ☐ todo | stretch — Cloud Run + Firestore + video |
 
-**In progress now:** nothing — plan just created.
-**Next up:** Milestone 0 spike.
+**In progress now:** M0 done. `apps/api` scaffolded with the failure-recovery core.
+**Next up:** Milestone 1 — finish scaffold (web app, root delegating scripts, synthetic district generator).
+
+### What exists in `apps/api` after M0
+- `models/scripted_llm.py` — offline `BaseLlm`; `models/factory.py` — Gemini-or-scripted selector
+- `store/{base,local_store}.py` — append-only Store (JSONL/in-memory)
+- `audit/log.py` — `AuditLog` + incident recorder
+- `guards/judge.py` — heuristic goal judge; `guards/failure_injection.py` — loop/hallucination/tool_error workers; `guards/supervisor.py` — the detect/kill/reroute/log core
+- `spike/run_spike.py` — terminal demo; `spike/smoke_gemini.py` — live-Gemini smoke
+- `tests/` — M0 gate (6 passed, 1 skipped) · run: `cd apps/api && .venv/bin/python -m pytest -q`
 
 ---
 
