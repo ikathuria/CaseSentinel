@@ -75,8 +75,11 @@ class Supervisor:
         audit.record("delegate", agent=primary.name, detail={"task_id": task_id, "student": student})
 
         outcome, fault = await self._evaluate(primary, prompt, judge, max_iterations=max_iterations)
-        audit.record("judge", agent=primary.name,
-                     detail={"ok": fault is None, "fault": fault, "detection": outcome.detection})
+        # Only record a content-judgment step when the content was actually judged
+        # (guard passed). Execution faults (loop/tool_error) are reported by "kill".
+        if fault in (None, "hallucination"):
+            audit.record("judge", agent=primary.name,
+                         detail={"ok": fault is None, "detection": outcome.detection})
 
         if fault is None:
             audit.record("resolved", agent=primary.name, detail={"served_by": primary.name})
