@@ -4,7 +4,7 @@
 > what the project is, how it's built, and where things are. **Keep it in sync** — update it
 > whenever the stack, structure, conventions, or status changes.
 
-_Last updated: 2026-08-29 (Milestone 0 complete — failure-recovery spike proven)_
+_Last updated: 2026-08-29 (Milestone 1 complete — scaffold, synthetic data, dashboard shell)_
 
 ---
 
@@ -84,22 +84,26 @@ CaseSentinel/
 | Milestone | Status | Notes |
 |---|---|---|
 | 0. Spike (detect/kill/reroute/log) | ✅ done | Proven on ADK 2.8.0; 4 scenarios green, offline. See `docs/01-architecture.md` |
-| 1. Scaffold | ◐ partial | `apps/api` exists (venv, pyproject, store, audit, guards); still need `apps/web`, root scripts, synthetic-data generator |
+| 1. Scaffold | ✅ done | `apps/api` (FastAPI + agents core) + `apps/web` (Vite/React/Tailwind shell) + synthetic district + root scripts |
 | 2. Core multi-agent system | ☐ todo | 5 agents + approval gate, sequential orchestration |
 | 3. Failure detection & recovery | ☐ todo | generalizes M0 into a real subsystem + injection API |
 | 4. Web dashboard | ☐ todo | the demo surface, incl. "break an agent" |
 | 5. Deploy + polish | ☐ todo | stretch — Cloud Run + Firestore + video |
 
-**In progress now:** M0 done. `apps/api` scaffolded with the failure-recovery core.
-**Next up:** Milestone 1 — finish scaffold (web app, root delegating scripts, synthetic district generator).
+**In progress now:** M1 done. Full stack runs locally end-to-end (Vite → FastAPI → synthetic district).
+**Next up:** Milestone 2 — the five agents under the supervisor + the approval gate, orchestrated sequentially, all writing to the audit log.
 
-### What exists in `apps/api` after M0
-- `models/scripted_llm.py` — offline `BaseLlm`; `models/factory.py` — Gemini-or-scripted selector
-- `store/{base,local_store}.py` — append-only Store (JSONL/in-memory)
-- `audit/log.py` — `AuditLog` + incident recorder
-- `guards/judge.py` — heuristic goal judge; `guards/failure_injection.py` — loop/hallucination/tool_error workers; `guards/supervisor.py` — the detect/kill/reroute/log core
-- `spike/run_spike.py` — terminal demo; `spike/smoke_gemini.py` — live-Gemini smoke
-- `tests/` — M0 gate (6 passed, 1 skipped) · run: `cd apps/api && .venv/bin/python -m pytest -q`
+### Run it locally
+```bash
+npm run dev:api    # FastAPI on :8000 (uvicorn --reload)
+npm run dev:web    # Vite dev server on :5173 (proxies /api and /health to :8000)
+npm test           # api pytest gate
+npm run build      # web typecheck + bundle
+```
+
+### What exists after M1
+`apps/api` (Python): `agents/`(M2) · `guards/{supervisor,judge,failure_injection}.py` · `approval/`(M2) · `store/{base,local_store}.py` · `audit/log.py` · `models/{scripted_llm,factory}.py` · `data/generate.py` (+ committed `data/fixtures/district.json`) · `api/app.py` (`/health`, `/api/district`) · `spike/` · `tests/` (12 passed, 1 skipped).
+`apps/web` (TS): `src/App.tsx` (district dashboard shell) · `src/lib/{api,types}.ts` · Tailwind v4 via `@tailwindcss/vite`.
 
 ---
 

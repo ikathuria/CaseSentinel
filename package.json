@@ -1,0 +1,12 @@
+{
+  "name": "casesentinel",
+  "private": true,
+  "description": "Governed multi-agent IDEA special-education compliance watch",
+  "scripts": {
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:api": "apps/api/.venv/bin/uvicorn casesentinel.api.app:app --reload --port 8000",
+    "build": "npm --prefix apps/web run build",
+    "lint": "npm --prefix apps/web run lint",
+    "test": "cd apps/api && .venv/bin/python -m pytest -q"
+  }
+}

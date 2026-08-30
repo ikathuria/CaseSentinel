@@ -186,13 +186,13 @@ Tasks:
 **Goal:** Repo runs locally; structure, deps, synthetic data, storage, and audit primitives in place.
 
 Tasks:
-- [ ] Create `apps/api` (Python 3.12, `pyproject.toml`, pinned deps) and `apps/web` (Vite 8 + React 19 + TS + Tailwind 4) — Done when: `uvicorn` serves `/health` 200 and `npm --prefix apps/web run dev` starts clean
-- [ ] Root delegating `package.json` (`dev`, `build`, `lint` call each app) + `.env.example` — Done when: committed
-- [ ] Implement `store/base.py` interface + `local_store.py` (JSON/SQLite) — Done when: audit/approval/case CRUD round-trips in a unit test
-- [ ] Implement append-only `audit/` log used by M0's incident writer — Done when: entries are immutable-append and timestamped (unit test)
-- [ ] Synthetic district generator (`data/`): several schools, dozens of caseloads, varied disability categories, **seeded timeline violations**, and a few **messy source docs** — Done when: `python -m casesentinel.data.generate` writes a deterministic fixture and a test asserts ≥1 seeded violation exists
-- [ ] Create `PROJECT.md` + one-line `CLAUDE.md` — Done when: PROJECT.md describes purpose, stack+versions, structure, conventions, status
-- [ ] Gate: lint + typecheck + tests pass — Done when: all green
+- [x] Create `apps/api` (Python 3.12, `pyproject.toml`, pinned deps) and `apps/web` (Vite 8.2 + React 19.2 + TS 6 + Tailwind 4.3) — Done when: `uvicorn` serves `/health` 200 and `npm --prefix apps/web run dev` starts clean _(both verified; Vite proxies /api → :8000 end-to-end)_
+- [x] Root delegating `package.json` (`dev:web`, `dev:api`, `build`, `lint`, `test`) + `.env.example` — Done when: committed
+- [x] Implement `store/base.py` interface + `local_store.py` (JSONL/in-memory) — Done when: audit/approval/case CRUD round-trips in a unit test _(M0)_
+- [x] Implement append-only `audit/` log used by M0's incident writer — Done when: entries are immutable-append and timestamped (unit test) _(M0)_
+- [x] Synthetic district generator (`data/`): 4 schools, 40 caseloads, 13 disability categories, **seeded timeline violations** (8 overdue + 10 due-soon), and 6 **messy source docs** — Done when: `python -m casesentinel.data.generate` writes a deterministic fixture and a test asserts ≥1 seeded violation exists
+- [x] Create `PROJECT.md` + one-line `CLAUDE.md` — Done when: PROJECT.md describes purpose, stack+versions, structure, conventions, status
+- [x] Gate: lint + typecheck + tests pass — Done when: all green _(api 12 passed/1 skipped; web build+lint clean)_
 
 ### Milestone 2: Core multi-agent system
 **Goal:** The five agents run under the supervisor on synthetic data, producing real outputs, every consequential output routed through the approval gate and written to the audit log.
