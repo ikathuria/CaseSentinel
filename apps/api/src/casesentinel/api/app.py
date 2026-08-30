@@ -26,11 +26,11 @@ from fastapi.responses import StreamingResponse
 from ..approval.gate import ApprovalError
 from ..data.generate import load_district
 from ..orchestrator import CaseSentinelOrchestrator
-from ..store.local_store import LocalStore
+from ..store.factory import get_store
 
 load_dotenv(Path(__file__).resolve().parents[3] / ".env")
 
-app = FastAPI(title="CaseSentinel API", version="0.2.0")
+app = FastAPI(title="CaseSentinel API", version="0.3.0")
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,9 +39,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# File-backed store so audit/approvals persist across requests during a demo.
-_DATA_DIR = os.environ.get("CASESENTINEL_DATA_DIR", str(Path(__file__).resolve().parents[3] / ".data"))
-store = LocalStore(base_dir=_DATA_DIR)
+# Backend selected by STORE_BACKEND (local JSONL / Firestore).
+store = get_store()
 orchestrator = CaseSentinelOrchestrator(store)
 gate = orchestrator.gate
 
@@ -133,6 +132,17 @@ def incidents() -> list[dict]:
     return store.list("incidents")
 
 
+def _mount_web() -> None:
+    """Serve the built dashboard from the same service (single Cloud Run container)."""
+    from fastapi.staticfiles import StaticFiles
+
+    dist = Path(
+        os.environ.get("WEB_DIST_DIR", str(Path(__file__).resolve().parents[4] / "web" / "dist"))
+    )
+    if dist.is_dir():
+        app.mount("/", StaticFiles(directory=str(dist), html=True), name="web")
+
+
 @app.get("/api/runs/{run_id}/trace")
 def run_trace(run_id: str) -> dict:
     """The full audit trail + incidents for one pipeline run (the due-process record)."""
@@ -141,3 +151,7 @@ def run_trace(run_id: str) -> dict:
     if not audit:
         raise HTTPException(404, f"no such run: {run_id}")
     return {"run_id": run_id, "audit_trail": audit, "incidents": inc}
+
+
+# Mount the built dashboard LAST so the /api/* routes above take precedence.
+_mount_web()

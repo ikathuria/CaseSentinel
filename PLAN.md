@@ -234,12 +234,12 @@ Tasks:
 **Goal:** Live on Google Cloud with visible proof, plus every deliverable ready.
 
 Tasks:
-- [ ] Flip `STORE_BACKEND=firestore`; provision Firestore; verify audit writes land — Done when: an approval writes a Firestore doc (screenshot for the video)
-- [ ] `adk deploy cloud_run` (serve built React static from the same service) — Done when: a public URL serves the dashboard and `/health` returns 200
-- [ ] Architecture diagram (agents, supervisor, guards, approval gate, store, GCP services) — Done when: committed to `docs/` and README
-- [ ] README: step-by-step spin-up, env vars, **synthetic-data disclaimer**, GCP-deployment proof, and the non-decorative justification for each Google service — Done when: a fresh reader can run it from scratch
-- [ ] Record ≤4-min demo (backend on Cloud Run, terminal logs, DB updates, the live break-and-recover) → public YouTube/Vimeo — Done when: link in README
-- [ ] Bonus (+): public build writeup; social post with `#AllThingsAgenticHackathon` — Done when: links captured
+- [x] `STORE_BACKEND=firestore` support — Done when: the store factory swaps LocalStore↔FirestoreStore behind the interface _(`store/firestore_store.py` + `store/factory.py`; lazy GCP import; unit-tested)_. **Provisioning a live Firestore needs the user's GCP project.**
+- [x] Single Cloud Run container serving built React static from the FastAPI service — Done when: one process serves the dashboard and `/health` returns 200 _(verified locally: `/`→200 html, `/health`→200; `Dockerfile` + `.dockerignore`)_. **`gcloud run deploy` needs the user's `gcloud` auth.**
+- [x] Architecture diagram (agents, supervisor, guards, approval gate, store, GCP services) — Done when: committed to `docs/` and README _(`docs/00-architecture-diagram.md`, mermaid)_
+- [x] README: spin-up, env vars, **synthetic-data disclaimer**, deploy steps, and the non-decorative justification for each Google service — Done when: a fresh reader can run it from scratch
+- [ ] Record ≤4-min demo → public YouTube/Vimeo — **needs the user** (screen recorder + account); script ready in `docs/03-demo-script.md`
+- [ ] Bonus (+): public build writeup; social post with `#AllThingsAgenticHackathon` — **needs the user**
 
 ---
 

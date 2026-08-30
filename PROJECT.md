@@ -88,10 +88,10 @@ CaseSentinel/
 | 2. Core multi-agent system | ✅ done | 4 sub-agents + approval gate, sequential orchestration under one run_id; `POST /api/run` |
 | 3. Failure detection & recovery | ✅ done | guards split (loop_guard + callbacks); retry/reroute/escalate policy; incidents + trace API |
 | 4. Web dashboard | ✅ done | posture cards, caseload grid, live SSE trace, approval gate, incident log, "break an agent" — verified live |
-| 5. Deploy + polish | ◐ next | stretch — Cloud Run + Firestore + README + video |
+| 5. Deploy + polish | ✅ code-complete | Firestore adapter + factory, Dockerfile (single container), README, architecture diagram. Live deploy + video need the user's GCP auth. |
 
-**In progress now:** M4 done. Dashboard verified live: injected hallucination → live trace shows reject/kill/reroute → resolved by fallback → draft approved by a named human (persisted).
-**Next up:** Milestone 5 (stretch) — README with spin-up + GCP justification, architecture diagram, Cloud Run/Firestore deploy (needs the user's gcloud auth), demo video.
+**In progress now:** M5 code-complete. Repo is deploy-ready: `Dockerfile` builds the dashboard and serves it from FastAPI; `STORE_BACKEND=firestore` swaps the store; single container verified locally (`/`→200 html, `/health`→200).
+**Remaining (need the user):** `gcloud run deploy` (their GCP project + billing), live Firestore provisioning, and the ≤4-min demo video (`docs/03-demo-script.md` has the script).
 
 ### M4 dashboard (apps/web)
 `GET /api/run/stream` SSE feeds a live agent-trace panel; `RunControls` injects faults ("break an agent"); `ApprovalsPanel` approves/rejects with a named approver; `IncidentsPanel` shows recoveries; `CaseloadTable` + `PostureCards` show drift. Backend added `on_event` to AuditLog for streaming.
