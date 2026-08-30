@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Callable
 
 from .agents.base import DriftAlert, Evidence, PostureReport
 from .agents.compliance_reporter import ComplianceReporter
@@ -63,9 +63,13 @@ class CaseSentinelOrchestrator:
         self.gate = ApprovalGate(store)
 
     async def run_pipeline_async(
-        self, district: dict, *, inject_fault: FaultType = "none"
+        self,
+        district: dict,
+        *,
+        inject_fault: FaultType = "none",
+        on_event: Callable[[dict[str, Any]], None] | None = None,
     ) -> PipelineResult:
-        audit = AuditLog(self._store)
+        audit = AuditLog(self._store, on_event=on_event)
         audit.record("pipeline_start",
                      detail={"district": district["name"], "inject_fault": inject_fault})
 

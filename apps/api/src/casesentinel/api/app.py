@@ -13,12 +13,15 @@ Endpoints:
 
 from __future__ import annotations
 
+import asyncio
+import json
 import os
 from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 
 from ..approval.gate import ApprovalError
 from ..data.generate import load_district
@@ -61,6 +64,41 @@ async def run(fault: str = Query("none")) -> dict:
         raise HTTPException(400, f"invalid fault {fault!r}; expected one of {sorted(_VALID_FAULTS)}")
     result = await orchestrator.run_pipeline_async(load_district(), inject_fault=fault)  # type: ignore[arg-type]
     return result.to_dict()
+
+
+@app.get("/api/run/stream")
+async def run_stream(fault: str = Query("none"), pace: float = Query(0.35)) -> StreamingResponse:
+    """Server-Sent Events: stream each pipeline step live, then a final result.
+
+    ``pace`` spaces events for a watchable cadence (presentation only; the events
+    are real). EventSource uses GET, so the fault is a query param.
+    """
+    if fault not in _VALID_FAULTS:
+        raise HTTPException(400, f"invalid fault {fault!r}")
+
+    async def gen():
+        queue: asyncio.Queue = asyncio.Queue()
+        district_data = load_district()
+        task = asyncio.create_task(
+            orchestrator.run_pipeline_async(
+                district_data, inject_fault=fault, on_event=queue.put_nowait  # type: ignore[arg-type]
+            )
+        )
+        # Drain audit events as they are produced, pacing for visibility.
+        while True:
+            try:
+                event = await asyncio.wait_for(queue.get(), timeout=0.1)
+            except asyncio.TimeoutError:
+                if task.done():
+                    break
+                continue
+            yield f"event: audit\ndata: {json.dumps(event)}\n\n"
+            if pace:
+                await asyncio.sleep(pace)
+        result = await task
+        yield f"event: result\ndata: {json.dumps(result.to_dict())}\n\n"
+
+    return StreamingResponse(gen(), media_type="text/event-stream")
 
 
 @app.get("/api/approvals")

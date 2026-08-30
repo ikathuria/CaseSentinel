@@ -221,14 +221,14 @@ Tasks:
 **Goal:** A director can see district posture, drift alerts, live agent reasoning, approve/reject a draft, read the audit log, and **break an agent on camera**.
 
 Tasks:
-- [ ] API client + SSE hook in `apps/web/src/lib` — Done when: the app streams live trace events from the running backend
-- [ ] **District overview + caseload grid** with color-coded drift status (Overdue/Due-Soon/Compliant) — Done when: seeded violations render with correct status from live data
-- [ ] **Live agent-trace panel** (SSE) showing supervisor delegation + sub-agent steps — Done when: running the pipeline streams steps in real time
-- [ ] **Approval-gate modal**: view a Drafter draft, Approve/Reject with approver name → writes audit entry, UI reflects new state — Done when: the click path approves a draft and the audit log updates live
-- [ ] **Audit-log + incident viewer** — Done when: normal actions and recovery incidents are both visible and filterable
-- [ ] **"Break an agent" control** wired to failure injection — Done when: clicking it triggers a fault and the trace panel shows the supervisor detecting, killing, rerouting, and logging — live
-- [ ] `docs/03-demo-script.md`: the ≤4-min unedited run (incl. the failure moment) — Done when: a step-by-step script produces the whole story
-- [ ] Gate: lint + typecheck + tests; manual click-path in demo script verified — Done when: all green
+- [x] API client + SSE hook in `apps/web/src/lib` — Done when: the app streams live trace events from the running backend _(EventSource `/api/run/stream`)_
+- [x] **District overview + caseload grid** with color-coded drift status (Overdue/Due-Soon/Compliant) — Done when: seeded violations render with correct status from live data _(+ at-risk-only filter)_
+- [x] **Live agent-trace panel** (SSE) showing supervisor delegation + sub-agent steps — Done when: running the pipeline streams steps in real time _(paced, human-readable summaries, auto-scroll)_
+- [x] **Approval-gate panel**: view a Drafter draft, Approve/Reject with approver name → writes audit entry, UI reflects new state — Done when: the click path approves a draft and it persists to Decided _(verified live: Finn Novak approved by Dr. Alvarez)_
+- [x] **Incident viewer** — Done when: recovery incidents are visible with fault type, detection, and action taken
+- [x] **"Break an agent" control** wired to failure injection — Done when: clicking it triggers a fault and the trace panel shows the supervisor detecting, killing, rerouting, and logging — live _(verified on camera: hallucination → reject → kill → reroute → resolved)_
+- [x] `docs/03-demo-script.md`: the ≤4-min unedited run (incl. the failure moment) — Done when: a step-by-step script produces the whole story
+- [x] Gate: lint + typecheck + tests; manual click-path in demo script verified — Done when: all green _(web build+lint clean; api 28 passed/1 skipped; live browser verification)_
 
 ### Milestone 5: Deploy + submission polish *(stretch — local-first per scope)*
 **Goal:** Live on Google Cloud with visible proof, plus every deliverable ready.

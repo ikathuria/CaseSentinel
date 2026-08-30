@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Callable
 
 from ..store.base import Store
 
@@ -22,11 +22,21 @@ def _now() -> str:
 
 
 class AuditLog:
-    """Scoped to a single supervised run (``run_id``)."""
+    """Scoped to a single supervised run (``run_id``).
 
-    def __init__(self, store: Store, run_id: str | None = None):
+    An optional ``on_event`` callback fires for every audit entry as it is written
+    — used by the SSE endpoint to stream the live trace to the dashboard.
+    """
+
+    def __init__(
+        self,
+        store: Store,
+        run_id: str | None = None,
+        on_event: Callable[[dict[str, Any]], None] | None = None,
+    ):
         self._store = store
         self.run_id = run_id or uuid.uuid4().hex
+        self._on_event = on_event
 
     def record(
         self,
@@ -36,7 +46,7 @@ class AuditLog:
         detail: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Append one audit entry (e.g. delegate, kill, reroute, approve)."""
-        return self._store.append(
+        entry = self._store.append(
             AUDIT,
             {
                 "run_id": self.run_id,
@@ -46,6 +56,9 @@ class AuditLog:
                 "detail": detail or {},
             },
         )
+        if self._on_event:
+            self._on_event(entry)
+        return entry
 
     def record_incident(
         self,

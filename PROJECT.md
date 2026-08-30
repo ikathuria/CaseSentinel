@@ -87,11 +87,14 @@ CaseSentinel/
 | 1. Scaffold | ✅ done | `apps/api` (FastAPI + agents core) + `apps/web` (Vite/React/Tailwind shell) + synthetic district + root scripts |
 | 2. Core multi-agent system | ✅ done | 4 sub-agents + approval gate, sequential orchestration under one run_id; `POST /api/run` |
 | 3. Failure detection & recovery | ✅ done | guards split (loop_guard + callbacks); retry/reroute/escalate policy; incidents + trace API |
-| 4. Web dashboard | ☐ todo | the demo surface, incl. "break an agent" |
-| 5. Deploy + polish | ☐ todo | stretch — Cloud Run + Firestore + video |
+| 4. Web dashboard | ✅ done | posture cards, caseload grid, live SSE trace, approval gate, incident log, "break an agent" — verified live |
+| 5. Deploy + polish | ◐ next | stretch — Cloud Run + Firestore + README + video |
 
-**In progress now:** M3 done. Recovery policy: transient→retry, systematic→reroute, fallback-fails→escalate-to-human; each logs one incident with `action_taken`.
-**Next up:** Milestone 4 — the dashboard (live SSE trace, approval modal, audit/incident viewer, "break an agent" control).
+**In progress now:** M4 done. Dashboard verified live: injected hallucination → live trace shows reject/kill/reroute → resolved by fallback → draft approved by a named human (persisted).
+**Next up:** Milestone 5 (stretch) — README with spin-up + GCP justification, architecture diagram, Cloud Run/Firestore deploy (needs the user's gcloud auth), demo video.
+
+### M4 dashboard (apps/web)
+`GET /api/run/stream` SSE feeds a live agent-trace panel; `RunControls` injects faults ("break an agent"); `ApprovalsPanel` approves/rejects with a named approver; `IncidentsPanel` shows recoveries; `CaseloadTable` + `PostureCards` show drift. Backend added `on_event` to AuditLog for streaming.
 
 ### Recovery policy (guards/supervisor.py)
 - transient (tool_error/model_error) → **retry the same worker once** → `retried_recovered`

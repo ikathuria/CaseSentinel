@@ -1,15 +1,8 @@
-// Mirrors the synthetic district JSON served by GET /api/district.
+// Mirrors the JSON served by the CaseSentinel API.
 
 export interface School {
   id: string
   name: string
-}
-
-export interface Staff {
-  id: string
-  name: string
-  role: string
-  school_id: string
 }
 
 export interface Student {
@@ -47,8 +40,85 @@ export interface District {
   name: string
   as_of: string
   schools: School[]
-  staff: Staff[]
+  staff: { id: string; name: string; role: string; school_id: string }[]
   students: Student[]
   cases: Case[]
   documents: SourceDocument[]
 }
+
+export interface DriftAlert {
+  student_id: string
+  student_name: string
+  case_manager_id: string
+  deadline_type: string
+  due_date: string
+  days_remaining: number
+  status: DriftStatus
+  severity: string
+}
+
+export interface Posture {
+  as_of: string
+  totals: Record<DriftStatus, number>
+  by_school: Record<string, Record<DriftStatus, number>>
+  by_category: Record<string, Record<DriftStatus, number>>
+  on_time_rate: number
+  at_risk: Record<string, unknown>[]
+}
+
+export interface Evidence {
+  student_id: string
+  student_name: string
+  summary: string
+  source_doc_ids: string[]
+}
+
+export interface Approval {
+  id: string
+  run_id: string
+  student_id: string
+  student_name: string
+  artifact_type: string
+  content: string
+  status: 'pending' | 'approved' | 'rejected'
+  approver: string | null
+  reason: string | null
+  created_ts: string
+  decided_ts: string | null
+}
+
+export interface Incident {
+  id: string
+  run_id: string
+  ts: string
+  agent: string
+  fault_type: string
+  detection: string
+  action_taken: string
+  detail: Record<string, unknown>
+}
+
+export interface AuditEntry {
+  run_id: string
+  ts: string
+  action: string
+  agent: string | null
+  detail: Record<string, unknown>
+  seq: number
+}
+
+export interface RunResult {
+  run_id: string
+  status: 'resolved' | 'needs_human'
+  alerts: DriftAlert[]
+  evidence: Evidence
+  draft: string | null
+  approval: Approval | null
+  posture: Posture
+  served_by: string | null
+  action_taken: string | null
+  incidents: Incident[]
+  audit_trail: AuditEntry[]
+}
+
+export type Fault = 'none' | 'loop' | 'hallucination' | 'tool_error' | 'transient_tool_error'
