@@ -129,6 +129,7 @@ npm run build      # web typecheck + bundle
 - 2026-08-29 — Storage behind an interface (local default, Firestore on deploy) — core demo never blocks on network/billing.
 - 2026-08-29 — Deploy to Cloud Run, not Vertex Agent Engine — `before_model_callback` crash reported on Agent Engine (#3798).
 - 2026-08-29 — Target `gemini-3.5-flash`/`-flash-lite`; no stable `gemini-3-pro` exists.
+- 2026-08-30 — Deep-testing pass: fixed a LocalStore persistence bug (wrote JSONL but never re-read it on init → data lost on restart) and made the live trace emit a `judge` step only for content judgment (execution faults are reported by `kill`). Added `tests/test_deep.py` (24 tests) + a 59-assertion live HTTP/SSE/concurrency battery. Suite now 54 passed, 1 skipped; coverage 87%.
 
 ---
 
