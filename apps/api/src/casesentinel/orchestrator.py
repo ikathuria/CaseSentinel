@@ -33,6 +33,7 @@ class PipelineResult:
     approval: dict[str, Any] | None
     posture: PostureReport
     served_by: str | None
+    action_taken: str | None = None
     incidents: list[dict[str, Any]] = field(default_factory=list)
     audit_trail: list[dict[str, Any]] = field(default_factory=list)
 
@@ -46,6 +47,7 @@ class PipelineResult:
             "approval": self.approval,
             "posture": self.posture.to_dict(),
             "served_by": self.served_by,
+            "action_taken": self.action_taken,
             "incidents": self.incidents,
             "audit_trail": self.audit_trail,
         }
@@ -132,6 +134,7 @@ class CaseSentinelOrchestrator:
             approval=approval,
             posture=posture,
             served_by=result.served_by,
+            action_taken=result.action_taken,
             incidents=audit.incidents(),
             audit_trail=audit.entries(),
         )

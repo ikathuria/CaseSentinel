@@ -86,12 +86,19 @@ CaseSentinel/
 | 0. Spike (detect/kill/reroute/log) | ✅ done | Proven on ADK 2.8.0; 4 scenarios green, offline. See `docs/01-architecture.md` |
 | 1. Scaffold | ✅ done | `apps/api` (FastAPI + agents core) + `apps/web` (Vite/React/Tailwind shell) + synthetic district + root scripts |
 | 2. Core multi-agent system | ✅ done | 4 sub-agents + approval gate, sequential orchestration under one run_id; `POST /api/run` |
-| 3. Failure detection & recovery | ☐ todo | generalizes M0 into a real subsystem + injection API |
+| 3. Failure detection & recovery | ✅ done | guards split (loop_guard + callbacks); retry/reroute/escalate policy; incidents + trace API |
 | 4. Web dashboard | ☐ todo | the demo surface, incl. "break an agent" |
 | 5. Deploy + polish | ☐ todo | stretch — Cloud Run + Firestore + video |
 
-**In progress now:** M2 done. Full pipeline runs (Timekeeper → Evidence Ingestor → guarded Document Drafter → Approval gate → Compliance Reporter), fault-injectable, all logged.
-**Next up:** Milestone 3 — generalize guarding to all agents + expose failure injection over the API + incident/trace endpoints for the dashboard.
+**In progress now:** M3 done. Recovery policy: transient→retry, systematic→reroute, fallback-fails→escalate-to-human; each logs one incident with `action_taken`.
+**Next up:** Milestone 4 — the dashboard (live SSE trace, approval modal, audit/incident viewer, "break an agent" control).
+
+### Recovery policy (guards/supervisor.py)
+- transient (tool_error/model_error) → **retry the same worker once** → `retried_recovered`
+- systematic (loop/hallucination) → **reroute to fallback** → `reroute_to_fallback`
+- fallback also fails → **escalate to human** → `needs_human` / `escalate_to_human`
+- Detection split: `loop_guard.py` (iteration cap + crash), `callbacks.py` (content judge). Agent-agnostic.
+- New endpoint: `GET /api/runs/{run_id}/trace`. New fault: `transient_tool_error`.
 
 ### M2 endpoints (see `api/app.py`)
 `POST /api/run?fault=none|loop|hallucination|tool_error` · `GET /api/approvals?status=` · `POST /api/approvals/{id}/decide` · `GET /api/audit?run_id=` · `GET /api/incidents`

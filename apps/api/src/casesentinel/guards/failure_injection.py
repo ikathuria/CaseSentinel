@@ -22,10 +22,12 @@ from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event
 from google.genai import types
 
-from ..agents.base import Evidence
-from ..agents.document_drafter import make_drafter
+from pydantic import PrivateAttr
 
-FaultType = Literal["none", "loop", "hallucination", "tool_error"]
+from ..agents.base import Evidence
+from ..agents.document_drafter import healthy_goal, make_drafter
+
+FaultType = Literal["none", "loop", "hallucination", "tool_error", "transient_tool_error"]
 
 
 class LoopingWorker(BaseAgent):
@@ -56,6 +58,27 @@ class CrashingWorker(BaseAgent):
         yield  # pragma: no cover  (makes this an async generator)
 
 
+class TransientDrafter(BaseAgent):
+    """Crashes on the first attempt, then succeeds — models a transient fault
+    that the supervisor's retry-once policy recovers without a fallback."""
+
+    student: str = ""
+    _attempts: int = PrivateAttr(default=0)
+
+    async def _run_async_impl(
+        self, ctx: InvocationContext
+    ) -> AsyncGenerator[Event, None]:
+        self._attempts += 1
+        if self._attempts == 1:
+            raise RuntimeError("evidence service timeout (transient)")
+        yield Event(
+            author=self.name,
+            content=types.Content(
+                role="model", parts=[types.Part(text=healthy_goal(self.student))]
+            ),
+        )
+
+
 def make_worker(
     name: str,
     fault: FaultType,
@@ -68,4 +91,6 @@ def make_worker(
         return LoopingWorker(name=name)
     if fault == "tool_error":
         return CrashingWorker(name=name)
+    if fault == "transient_tool_error":
+        return TransientDrafter(name=name, student=student)
     return make_drafter(name, fault, student=student, evidence=evidence)

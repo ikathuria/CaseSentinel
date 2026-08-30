@@ -211,11 +211,11 @@ Tasks:
 **Goal:** The M0 spike, generalized into a real, testable subsystem the supervisor applies to every sub-agent, triggerable live.
 
 Tasks:
-- [ ] `guards/failure_injection.py`: a real feature (env-gated) to inject a **loop**, a **hallucinated goal**, or a **tool-error** into a named sub-agent — Done when: an API/CLI flag reproducibly breaks the chosen agent
-- [ ] Generalize `guards/callbacks.py` + `loop_guard.py` so the supervisor monitors **all** sub-agents (iteration caps + output judge) — Done when: any injected fault is detected regardless of which agent
-- [ ] Supervisor recovery policy: kill the faulty run, reroute (retry-once → fallback → "needs human"), and write a structured **incident** record distinct from normal audit entries — Done when: each fault type yields the correct action + incident
-- [ ] Expose the incident + trace over the API for the dashboard — Done when: `GET /incidents` and the SSE stream include the recovery events
-- [ ] Gate: E2E tests injecting all three fault types assert detect → kill → reroute → incident-logged — Done when: all green
+- [x] `guards/failure_injection.py`: a real feature to inject a **loop**, a **hallucinated goal**, a **tool-error**, or a **transient tool-error** into the drafter — Done when: `POST /api/run?fault=` reproducibly breaks it _(4 injectable faults; drafter is the injectable target — deterministic agents can't loop/hallucinate)_
+- [x] Generalize `guards/loop_guard.py` (execution: loop/crash) + `guards/callbacks.py` (content judge) so the supervisor monitors **any** sub-agent — Done when: any injected fault is detected regardless of agent _(guard is agent-agnostic; unit-tested on generic workers)_
+- [x] Supervisor recovery policy: kill, then **retry-once for transient faults / reroute for systematic faults / escalate to human if the fallback also fails**, writing one structured **incident** with `action_taken` — Done when: each fault type yields the correct action + incident
+- [x] Expose the incident + trace over the API — Done when: `GET /api/incidents` and `GET /api/runs/{run_id}/trace` return the recovery events _(live SSE stream added in M4)_
+- [x] Gate: E2E tests injecting all fault types assert detect → kill → retry/reroute/escalate → incident-logged — Done when: all green _(28 passed, 1 skipped; live HTTP smoke)_
 
 ### Milestone 4: Web dashboard (the demo surface)
 **Goal:** A director can see district posture, drift alerts, live agent reasoning, approve/reject a draft, read the audit log, and **break an agent on camera**.

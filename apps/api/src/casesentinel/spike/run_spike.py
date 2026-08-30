@@ -43,6 +43,7 @@ def run_scenario(supervisor: Supervisor, fault: FaultType) -> None:
         detail = e.get("detail") or {}
         print(f"  audit: {e['action']:<18}{agent:<22} {detail}")
     print(f"  --> status: {result.status.upper()}"
+          + (f", action: {result.action_taken}" if result.action_taken else "")
           + (f", served_by: {result.served_by}" if result.served_by else "")
           + (f", output: {result.output!r}" if result.output else ""))
     if result.incidents:
@@ -58,12 +59,12 @@ def main() -> None:
     print(_line("#"))
 
     supervisor = Supervisor(LocalStore())
-    for fault in ("none", "loop", "hallucination", "tool_error"):
+    for fault in ("none", "loop", "hallucination", "tool_error", "transient_tool_error"):
         run_scenario(supervisor, fault)  # type: ignore[arg-type]
 
     print(f"\n{_line('#')}")
-    print("Done. Each injected fault was detected, the worker killed, the task "
-          "rerouted to a healthy fallback, and an incident logged.")
+    print("Done. Systematic faults (loop/hallucination) were killed and rerouted to a "
+          "healthy fallback; the transient fault was recovered by retry — each logged.")
     print(_line("#"))
 
 

@@ -42,7 +42,7 @@ store = LocalStore(base_dir=_DATA_DIR)
 orchestrator = CaseSentinelOrchestrator(store)
 gate = orchestrator.gate
 
-_VALID_FAULTS = {"none", "loop", "hallucination", "tool_error"}
+_VALID_FAULTS = {"none", "loop", "hallucination", "tool_error", "transient_tool_error"}
 
 
 @app.get("/health")
@@ -93,3 +93,13 @@ def audit(run_id: str | None = Query(None)) -> list[dict]:
 @app.get("/api/incidents")
 def incidents() -> list[dict]:
     return store.list("incidents")
+
+
+@app.get("/api/runs/{run_id}/trace")
+def run_trace(run_id: str) -> dict:
+    """The full audit trail + incidents for one pipeline run (the due-process record)."""
+    audit = [r for r in store.list("audit") if r.get("run_id") == run_id]
+    inc = [r for r in store.list("incidents") if r.get("run_id") == run_id]
+    if not audit:
+        raise HTTPException(404, f"no such run: {run_id}")
+    return {"run_id": run_id, "audit_trail": audit, "incidents": inc}
