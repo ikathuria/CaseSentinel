@@ -18,10 +18,24 @@ class LocalStore(Store):
     def __init__(self, base_dir: str | Path | None = None):
         # In-memory only when base_dir is None (fast, isolated tests).
         self._base_dir = Path(base_dir) if base_dir is not None else None
-        if self._base_dir is not None:
-            self._base_dir.mkdir(parents=True, exist_ok=True)
         self._mem: dict[str, list[dict[str, Any]]] = {}
         self._lock = threading.Lock()
+        if self._base_dir is not None:
+            self._base_dir.mkdir(parents=True, exist_ok=True)
+            self._load()
+
+    def _load(self) -> None:
+        """Load existing JSONL files so state survives a process restart."""
+        assert self._base_dir is not None
+        for path in sorted(self._base_dir.glob("*.jsonl")):
+            collection = path.stem
+            rows: list[dict[str, Any]] = []
+            with path.open(encoding="utf-8") as fh:
+                for line in fh:
+                    line = line.strip()
+                    if line:
+                        rows.append(json.loads(line))
+            self._mem[collection] = rows
 
     def _path(self, collection: str) -> Path:
         assert self._base_dir is not None
