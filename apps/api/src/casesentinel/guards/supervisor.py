@@ -100,8 +100,9 @@ class Supervisor:
         primary: BaseAgent,
         fallback: BaseAgent,
         max_iterations: int = 5,
+        audit: AuditLog | None = None,
     ) -> SuperviseResult:
-        audit = AuditLog(self._store)
+        audit = audit or AuditLog(self._store)
         audit.record("delegate", agent=primary.name, detail={"task_id": task_id, "student": student})
 
         run = await self._run_guarded(primary, prompt, max_iterations=max_iterations)

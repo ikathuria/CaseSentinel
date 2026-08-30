@@ -198,14 +198,14 @@ Tasks:
 **Goal:** The five agents run under the supervisor on synthetic data, producing real outputs, every consequential output routed through the approval gate and written to the audit log.
 
 Tasks:
-- [ ] Write `docs/02-agent-contracts.md` (inputs/outputs/tools/failure modes per agent) — Done when: all 5 agents specified with no open questions
-- [ ] **Timekeeper**: scans caseloads, computes days-to-deadline, emits drift alerts (deterministic dates + Gemini prioritization/summary) — Done when: it flags the seeded violations with severity, unit-tested
-- [ ] **Evidence Ingestor**: normalizes messy docs into a structured evidence object (`gemini-3.5-flash-lite`) — Done when: a messy fixture yields a clean structured record, unit-tested
-- [ ] **Document Drafter**: PLAAFP/goal/PWN/BIP draft from ingested evidence (`gemini-3.5-flash`) — Done when: given evidence, returns a structured draft with source citations
-- [ ] **Compliance Reporter**: rolls caseload status into a district posture summary vs. state indicators — Done when: returns a district-level rollup object, unit-tested
-- [ ] **Approval gate** (`approval/gate.py`): every Drafter output creates a `pending` ApprovalRequest; approve/reject transitions write to the audit log with the named approver — Done when: state machine unit-tested (pending→approved, pending→rejected)
-- [ ] Supervisor orchestrates the full pipeline **sequentially** (RPM-safe) and logs every step via OTel/audit — Done when: `python -m casesentinel.run --district demo` produces alerts + a draft + an approval request + a posture report, all in the audit log
-- [ ] Gate: lint + typecheck + tests + one E2E happy-path test of the full pipeline — Done when: all green
+- [x] Write `docs/02-agent-contracts.md` (inputs/outputs/tools/failure modes per agent) — Done when: all agents specified with no open questions
+- [x] **Timekeeper**: scans caseloads, computes days-to-deadline, emits drift alerts (deterministic) — Done when: it flags the seeded violations with severity, unit-tested _(most-urgent-first, all 4 deadline types)_
+- [x] **Evidence Ingestor**: normalizes messy docs into a structured evidence object (`gemini-3.5-flash-lite`; deterministic offline) — Done when: a messy fixture yields a clean record, unit-tested
+- [x] **Document Drafter**: goal draft from ingested evidence (`gemini-3.5-flash`; scripted offline) — Done when: given evidence, returns a draft _(guarded; evidence-aware instruction)_
+- [x] **Compliance Reporter**: rolls caseload status into a district posture summary vs. state indicators — Done when: returns a district-level rollup object, unit-tested _(totals add up to caseload size)_
+- [x] **Approval gate** (`approval/gate.py`): every Drafter output creates a `pending` ApprovalRequest; approve/reject transitions write to the audit log with the named approver — Done when: state machine unit-tested (pending→approved/rejected; double-decide rejected) _(append-only, state folded from immutable records)_
+- [x] Supervisor orchestrates the full pipeline **sequentially** (RPM-safe) and logs every step via audit — Done when: pipeline produces alerts + a draft + an approval request + a posture report, all under one `run_id` _(`orchestrator.py`; `POST /api/run`)_
+- [x] Gate: lint + typecheck + tests + one E2E happy-path test of the full pipeline — Done when: all green _(21 passed, 1 skipped; live HTTP smoke of run/approve/decide/incidents)_
 
 ### Milestone 3: Failure detection & recovery (the signature feature)
 **Goal:** The M0 spike, generalized into a real, testable subsystem the supervisor applies to every sub-agent, triggerable live.

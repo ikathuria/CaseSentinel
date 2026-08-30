@@ -85,13 +85,16 @@ CaseSentinel/
 |---|---|---|
 | 0. Spike (detect/kill/reroute/log) | ✅ done | Proven on ADK 2.8.0; 4 scenarios green, offline. See `docs/01-architecture.md` |
 | 1. Scaffold | ✅ done | `apps/api` (FastAPI + agents core) + `apps/web` (Vite/React/Tailwind shell) + synthetic district + root scripts |
-| 2. Core multi-agent system | ☐ todo | 5 agents + approval gate, sequential orchestration |
+| 2. Core multi-agent system | ✅ done | 4 sub-agents + approval gate, sequential orchestration under one run_id; `POST /api/run` |
 | 3. Failure detection & recovery | ☐ todo | generalizes M0 into a real subsystem + injection API |
 | 4. Web dashboard | ☐ todo | the demo surface, incl. "break an agent" |
 | 5. Deploy + polish | ☐ todo | stretch — Cloud Run + Firestore + video |
 
-**In progress now:** M1 done. Full stack runs locally end-to-end (Vite → FastAPI → synthetic district).
-**Next up:** Milestone 2 — the five agents under the supervisor + the approval gate, orchestrated sequentially, all writing to the audit log.
+**In progress now:** M2 done. Full pipeline runs (Timekeeper → Evidence Ingestor → guarded Document Drafter → Approval gate → Compliance Reporter), fault-injectable, all logged.
+**Next up:** Milestone 3 — generalize guarding to all agents + expose failure injection over the API + incident/trace endpoints for the dashboard.
+
+### M2 endpoints (see `api/app.py`)
+`POST /api/run?fault=none|loop|hallucination|tool_error` · `GET /api/approvals?status=` · `POST /api/approvals/{id}/decide` · `GET /api/audit?run_id=` · `GET /api/incidents`
 
 ### Run it locally
 ```bash

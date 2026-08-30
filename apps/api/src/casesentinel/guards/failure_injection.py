@@ -4,38 +4,28 @@ Builds ADK worker agents that deliberately misbehave so the supervisor's
 detect -> kill -> reroute -> log path can be exercised on demand, in tests and
 live on camera. Three fault classes:
 
-- ``loop``        : a worker that never terminates (runaway).
+- ``loop``         : a worker that never terminates (runaway).
 - ``hallucination``: a drafter that returns a goal for the wrong student / non-measurable.
-- ``tool_error``  : a worker that raises mid-run (a failed tool/service call).
+- ``tool_error``   : a worker that raises mid-run (a failed tool/service call).
 
 The healthy drafter (``fault="none"``) is the fallback the supervisor reroutes to.
-All drafters use the scripted model so injected behavior is deterministic and
-runs offline; production drafting uses a live Gemini model (see models.factory).
+Drafter construction lives in agents/document_drafter.py; this module adds the
+looping/crashing workers and the unified ``make_worker`` entry point.
 """
 
 from __future__ import annotations
 
 from typing import AsyncGenerator, Literal
 
-from google.adk.agents import BaseAgent, LlmAgent
+from google.adk.agents import BaseAgent
 from google.adk.agents.invocation_context import InvocationContext
 from google.adk.events import Event
 from google.genai import types
 
-from ..models.scripted_llm import ScriptedLlm
+from ..agents.base import Evidence
+from ..agents.document_drafter import make_drafter
 
 FaultType = Literal["none", "loop", "hallucination", "tool_error"]
-
-# A wrong-student, non-measurable goal — fails the judge on two counts.
-_HALLUCINATED_GOAL = "Alex Chen will get better at reading over time."
-
-
-def _healthy_goal(student: str) -> str:
-    first = student.split()[0]
-    return (
-        f"{first} will read grade-level text at 90 words per minute with 95% "
-        f"accuracy in 4 of 5 trials by June 2027."
-    )
 
 
 class LoopingWorker(BaseAgent):
@@ -66,16 +56,16 @@ class CrashingWorker(BaseAgent):
         yield  # pragma: no cover  (makes this an async generator)
 
 
-def make_worker(name: str, fault: FaultType, *, student: str) -> BaseAgent:
+def make_worker(
+    name: str,
+    fault: FaultType,
+    *,
+    student: str,
+    evidence: Evidence | None = None,
+) -> BaseAgent:
     """Build a worker agent exhibiting the requested fault (or a healthy one)."""
     if fault == "loop":
         return LoopingWorker(name=name)
     if fault == "tool_error":
         return CrashingWorker(name=name)
-
-    response = _HALLUCINATED_GOAL if fault == "hallucination" else _healthy_goal(student)
-    return LlmAgent(
-        name=name,
-        model=ScriptedLlm(model="scripted", responses=[response]),
-        instruction=f"Draft one measurable IEP reading goal for {student}.",
-    )
+    return make_drafter(name, fault, student=student, evidence=evidence)
