@@ -7,7 +7,11 @@ from datetime import date
 import pytest
 from fastapi.testclient import TestClient
 
+import asyncio
+
+from casesentinel.agents import evidence_ingestor as ei_mod
 from casesentinel.agents.compliance_reporter import ComplianceReporter
+from casesentinel.agents.evidence_ingestor import EvidenceIngestor
 from casesentinel.agents.timekeeper import Timekeeper
 from casesentinel.api.app import app
 from casesentinel.approval.gate import ApprovalError, ApprovalGate
@@ -43,6 +47,23 @@ def test_localstore_list_returns_copy_not_internal_ref():
 
 def test_committed_fixture_matches_generator():
     assert load_district() == to_dict(generate_district())
+
+
+# --- evidence ingestor degrades gracefully when Gemini fails (regression) -----
+
+def test_ingestor_falls_back_when_gemini_errors(monkeypatch):
+    # Force the Gemini path, then make it raise (e.g. 429 quota) — the pipeline
+    # must NOT crash; it should fall back to the deterministic normalizer.
+    monkeypatch.setenv("GOOGLE_API_KEY", "fake-key-for-test")
+
+    async def boom(*args, **kwargs):
+        raise RuntimeError("429 RESOURCE_EXHAUSTED")
+
+    monkeypatch.setattr(ei_mod, "run_text", boom)
+    student = DISTRICT["students"][0]
+    docs = [d for d in DISTRICT["documents"] if d["student_id"] == student["id"]]
+    ev = asyncio.run(EvidenceIngestor().run(student, docs))
+    assert ev.summary and "normalized from" in ev.summary.lower()
 
 
 # --- timekeeper edge cases ---------------------------------------------------

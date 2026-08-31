@@ -64,7 +64,12 @@ class EvidenceIngestor:
                 "measurable datum (e.g. words-per-minute, accuracy %), and never invent facts."
             ),
         )
-        text = await run_text(agent, f"Summarize the evidence for {student_name}:\n{joined}")
+        try:
+            text = await run_text(agent, f"Summarize the evidence for {student_name}:\n{joined}")
+        except Exception:
+            # Gemini unavailable (rate limit, quota, outage) — degrade gracefully to
+            # the deterministic normalizer instead of failing the whole pipeline.
+            return self._summarize_deterministic(student_name, docs)
         return text.strip() or self._summarize_deterministic(student_name, docs)
 
     def _summarize_deterministic(self, student_name: str, docs: list[dict]) -> str:
