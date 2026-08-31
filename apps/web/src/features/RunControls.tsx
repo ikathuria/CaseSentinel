@@ -1,17 +1,45 @@
 import type { Fault, RunResult } from '../lib/types'
+import { describeOutcome } from '../lib/ui'
 
 const FAULTS: { value: Fault; label: string }[] = [
-  { value: 'none', label: 'No fault (healthy run)' },
-  { value: 'hallucination', label: 'Hallucination (wrong student / non-measurable)' },
-  { value: 'loop', label: 'Runaway loop' },
-  { value: 'tool_error', label: 'Tool error (persistent)' },
-  { value: 'transient_tool_error', label: 'Tool error (transient — recovers on retry)' },
+  { value: 'none', label: "Don't break anything — healthy run" },
+  { value: 'hallucination', label: 'Make it hallucinate (wrong student / vague goal)' },
+  { value: 'loop', label: 'Make it get stuck in a loop' },
+  { value: 'tool_error', label: 'Make a tool fail (keeps failing)' },
+  { value: 'transient_tool_error', label: 'Make a tool fail once (recovers on retry)' },
 ]
 
-const ACTION_LABEL: Record<string, string> = {
-  retried_recovered: 'retried & recovered',
-  reroute_to_fallback: 'rerouted to fallback',
-  escalate_to_human: 'escalated to human',
+function OutcomeCard({ run }: { run: RunResult }) {
+  const o = describeOutcome(run)
+  const ok = o.tone === 'ok'
+  return (
+    <div
+      className={`mt-4 rounded-lg border-l-4 p-4 ${
+        ok ? 'border-emerald-500 bg-emerald-50/60' : 'border-red-500 bg-red-50/60'
+      }`}
+    >
+      <div className="flex items-start gap-3">
+        <span
+          className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
+            ok ? 'bg-emerald-500' : 'bg-red-500'
+          }`}
+        >
+          {ok ? '✓' : '!'}
+        </span>
+        <div className="min-w-0">
+          <div className={`text-sm font-semibold ${ok ? 'text-emerald-900' : 'text-red-900'}`}>
+            {o.headline}
+          </div>
+          <p className="mt-1 text-sm text-slate-600">{o.detail}</p>
+          {run.incidents.length > 0 && (
+            <p className="mt-1.5 text-xs text-slate-400">
+              {run.incidents.length} incident{run.incidents.length > 1 ? 's' : ''} written to the audit log · run {run.run_id.slice(0, 8)}
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export function RunControls({
@@ -30,10 +58,13 @@ export function RunControls({
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-end gap-3">
-        <div className="flex-1 min-w-[260px]">
-          <label className="mb-1 block text-xs font-medium uppercase tracking-wide text-slate-500">
-            Break an agent (inject a fault into the Document Drafter)
+        <div className="flex-1 min-w-[280px]">
+          <label className="mb-1 block text-sm font-medium text-slate-700">
+            Run a compliance sweep
           </label>
+          <p className="mb-2 text-xs text-slate-400">
+            Optionally break the Document Drafter to see the supervisor detect and recover from it.
+          </p>
           <select
             value={fault}
             onChange={(e) => setFault(e.target.value as Fault)}
@@ -50,41 +81,13 @@ export function RunControls({
         <button
           onClick={onRun}
           disabled={running}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
         >
           {running ? 'Running…' : 'Run compliance sweep'}
         </button>
       </div>
 
-      {run && (
-        <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-          <span
-            className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${
-              run.status === 'resolved'
-                ? 'bg-emerald-100 text-emerald-800 ring-emerald-600/20'
-                : 'bg-red-100 text-red-800 ring-red-600/20'
-            }`}
-          >
-            {run.status === 'resolved' ? 'Resolved' : 'Needs human'}
-          </span>
-          {run.action_taken && (
-            <span className="text-slate-500">
-              recovery: <strong className="text-slate-700">{ACTION_LABEL[run.action_taken] ?? run.action_taken}</strong>
-            </span>
-          )}
-          {run.served_by && (
-            <span className="text-slate-500">
-              served by <strong className="text-slate-700">{run.served_by}</strong>
-            </span>
-          )}
-          {run.incidents.length > 0 && (
-            <span className="text-red-600">
-              {run.incidents.length} incident{run.incidents.length > 1 ? 's' : ''} logged
-            </span>
-          )}
-          <span className="text-slate-400">run {run.run_id.slice(0, 8)}</span>
-        </div>
-      )}
+      {run && <OutcomeCard run={run} />}
     </div>
   )
 }
