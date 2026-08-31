@@ -1,5 +1,14 @@
 # 00 — Architecture Diagram
 
+Rendered image (for slides / Devpost): [`casesentinel-architecture.png`](casesentinel-architecture.png)
+(source: [`casesentinel-architecture.svg`](casesentinel-architecture.svg)).
+
+![CaseSentinel architecture](casesentinel-architecture.png)
+
+---
+
+Mermaid version:
+
 ```mermaid
 flowchart TB
     Director([SpEd Director / Compliance Coordinator])

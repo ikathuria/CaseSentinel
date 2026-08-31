@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+    <marker id="arrowblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1a73e8"/>
+    </marker>
+    <style>
+      .t   { fill:#0f172a; }
+      .mut { fill:#64748b; }
+      .box   { fill:#ffffff; stroke:#cbd5e1; stroke-width:1.5; }
+      .agent { fill:#f8fafc; stroke:#94a3b8; stroke-width:1.5; }
+      .gcp   { fill:#e8f0fe; stroke:#1a73e8; stroke-width:1.5; }
+      .gate  { fill:#eef2ff; stroke:#6366f1; stroke-width:1.5; }
+      .recov { fill:#fef2f2; stroke:#ef4444; stroke-width:1.5; }
+      .cont  { fill:#fbfcfe; stroke:#94a3b8; stroke-width:1.5; stroke-dasharray:2 0; }
+      .lbl   { fill:#64748b; font-size:12px; }
+      .edge  { stroke:#94a3b8; stroke-width:1.6; fill:none; }
+      .edgeb { stroke:#1a73e8; stroke-width:1.6; fill:none; stroke-dasharray:6 4; }
+      .h     { font-weight:700; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="800" fill="#f8fafc"/>
+  <rect x="16" y="16" width="1168" height="768" rx="16" fill="#ffffff" stroke="#e2e8f0"/>
+
+  <!-- Header -->
+  <text x="44" y="56" class="t" font-size="28" font-weight="700">Case<tspan fill="#4f46e5">Sentinel</tspan></text>
+  <text x="46" y="80" class="mut" font-size="14">Architecture — a governed multi-agent system for district-wide IDEA special-education compliance</text>
+  <rect x="980" y="40" width="16" height="16" rx="3" class="gcp"/>
+  <text x="1004" y="53" class="mut" font-size="12">Google Cloud / Gemini</text>
+
+  <!-- Row A: Director + Dashboard -->
+  <rect x="44" y="108" width="180" height="64" rx="10" class="agent"/>
+  <text x="134" y="134" text-anchor="middle" class="t h" font-size="14">SpEd Director</text>
+  <text x="134" y="153" text-anchor="middle" class="mut" font-size="11.5">Compliance Coordinator</text>
+
+  <rect x="270" y="100" width="886" height="80" rx="10" class="box"/>
+  <text x="290" y="126" class="t h" font-size="14">Web Dashboard <tspan class="mut" font-weight="400">· React + Vite + Tailwind</tspan></text>
+  <text x="290" y="152" class="mut" font-size="12.5">Posture cards · Caseload drift grid · Live agent trace (SSE) · Approval gate · Break-an-agent · Incident log</text>
+
+  <line x1="224" y1="140" x2="268" y2="140" class="edge" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+
+  <!-- Row B: Cloud Run API -->
+  <line x1="713" y1="180" x2="713" y2="206" class="edge" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <text x="723" y="197" class="lbl">fetch / EventSource</text>
+  <rect x="270" y="208" width="886" height="58" rx="10" class="gcp"/>
+  <text x="290" y="234" class="t h" font-size="14">FastAPI on Cloud Run</text>
+  <text x="290" y="253" class="mut" font-size="12.5">REST API · Server-Sent Events (streams every pipeline step live) · serves the built dashboard from one container</text>
+
+  <!-- API -> Supervisor -->
+  <line x1="713" y1="266" x2="713" y2="298" class="edge" marker-end="url(#arrow)"/>
+  <text x="723" y="286" class="lbl">POST /api/run(.stream)</text>
+
+  <!-- Row C: Supervisor container -->
+  <rect x="44" y="300" width="1112" height="248" rx="12" class="cont"/>
+  <text x="64" y="326" class="t h" font-size="14">Supervisor / Orchestrator <tspan class="mut" font-weight="400">· Google ADK 2.8 · sequential (RPM-safe) · one run_id · logs every step</tspan></text>
+
+  <!-- Agents -->
+  <g>
+    <rect x="66" y="352" width="242" height="92" rx="10" class="agent"/>
+    <text x="187" y="392" text-anchor="middle" class="t h" font-size="13.5">Timekeeper</text>
+    <text x="187" y="412" text-anchor="middle" class="mut" font-size="11.5">deadline drift across</text>
+    <text x="187" y="428" text-anchor="middle" class="mut" font-size="11.5">all caseloads</text>
+
+    <rect x="336" y="352" width="242" height="92" rx="10" class="agent"/>
+    <text x="457" y="392" text-anchor="middle" class="t h" font-size="13.5">Evidence Ingestor</text>
+    <text x="457" y="412" text-anchor="middle" class="mut" font-size="11.5">normalizes messy</text>
+    <text x="457" y="428" text-anchor="middle" class="mut" font-size="11.5">source documents</text>
+
+    <rect x="606" y="352" width="242" height="92" rx="10" class="agent"/>
+    <rect x="770" y="343" width="70" height="20" rx="10" class="recov"/>
+    <text x="805" y="357" text-anchor="middle" fill="#dc2626" font-size="10.5" font-weight="700">guarded</text>
+    <text x="727" y="392" text-anchor="middle" class="t h" font-size="13.5">Document Drafter</text>
+    <text x="727" y="412" text-anchor="middle" class="mut" font-size="11.5">drafts a measurable</text>
+    <text x="727" y="428" text-anchor="middle" class="mut" font-size="11.5">IEP goal</text>
+
+    <rect x="876" y="352" width="242" height="92" rx="10" class="agent"/>
+    <text x="997" y="392" text-anchor="middle" class="t h" font-size="13.5">Compliance Reporter</text>
+    <text x="997" y="412" text-anchor="middle" class="mut" font-size="11.5">district posture vs.</text>
+    <text x="997" y="428" text-anchor="middle" class="mut" font-size="11.5">state indicators</text>
+
+    <line x1="308" y1="398" x2="336" y2="398" class="edge" marker-end="url(#arrow)"/>
+    <line x1="578" y1="398" x2="606" y2="398" class="edge" marker-end="url(#arrow)"/>
+    <line x1="848" y1="398" x2="876" y2="398" class="edge" marker-end="url(#arrow)"/>
+  </g>
+
+  <!-- Recovery ribbon -->
+  <rect x="66" y="470" width="1052" height="56" rx="10" class="recov"/>
+  <text x="86" y="494" fill="#b91c1c" font-size="13" font-weight="700">Failure detection &amp; recovery — the signature feature</text>
+  <text x="86" y="514" fill="#7f1d1d" font-size="12.5">Guard = loop cap + content judge.  On fault → <tspan font-weight="700">retry</tspan> (transient) · <tspan font-weight="700">reroute</tspan> to fallback (systematic) · <tspan font-weight="700">escalate to a human</tspan> · logs a structured incident.</text>
+
+  <!-- Row D: Gemini / Approval / Audit -->
+  <rect x="44" y="576" width="352" height="120" rx="10" class="gcp"/>
+  <text x="64" y="606" class="t h" font-size="14">Gemini 3.5 <tspan class="mut" font-weight="400">· via google-genai</tspan></text>
+  <text x="64" y="630" class="mut" font-size="12.5">gemini-3.5-flash — drafting</text>
+  <text x="64" y="650" class="mut" font-size="12.5">gemini-3.5-flash-lite — ingestion</text>
+  <text x="64" y="676" class="mut" font-size="11.5" font-style="italic">deterministic offline fallback (rate-limit-proof)</text>
+
+  <rect x="424" y="576" width="352" height="120" rx="10" class="gate"/>
+  <text x="444" y="606" class="t h" font-size="14" fill="#4338ca">Human Approval Gate</text>
+  <text x="444" y="630" class="mut" font-size="12.5">Every draft → a pending, named-human</text>
+  <text x="444" y="650" class="mut" font-size="12.5">decision: approved / rejected.</text>
+  <text x="444" y="676" class="t" font-size="12" font-weight="700">No agent takes a binding action.</text>
+
+  <rect x="804" y="576" width="352" height="120" rx="10" class="gcp"/>
+  <text x="824" y="606" class="t h" font-size="14">Append-only Audit Log</text>
+  <text x="824" y="630" class="mut" font-size="12.5">+ structured incidents — the</text>
+  <text x="824" y="650" class="mut" font-size="12.5">due-process paper trail.</text>
+  <text x="824" y="676" class="mut" font-size="11.5">Firestore (deployed) · JSONL (local)</text>
+
+  <!-- edges into row D -->
+  <path d="M600,470 L600,576" class="edge" marker-end="url(#arrow)"/>
+  <text x="610" y="558" class="lbl">draft → approval</text>
+  <path d="M220,576 C220,540 300,470 360,452" class="edgeb" marker-end="url(#arrowblue)"/>
+  <path d="M300,576 C360,540 600,470 700,452" class="edgeb" marker-end="url(#arrowblue)"/>
+  <text x="150" y="566" fill="#1a56db" font-size="11">Gemini calls</text>
+  <path d="M980,548 L980,576" class="edge" marker-end="url(#arrow)"/>
+  <text x="990" y="568" class="lbl">writes</text>
+  <path d="M776,636 L804,636" class="edge" marker-end="url(#arrow)"/>
+
+  <!-- Footer -->
+  <text x="44" y="758" class="mut" font-size="12">Synthetic data only — no real student records.</text>
+  <text x="1156" y="758" text-anchor="end" class="mut" font-size="12">github.com/ikathuria/CaseSentinel · live on Cloud Run</text>
+</svg>

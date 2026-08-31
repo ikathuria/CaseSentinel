@@ -41,8 +41,10 @@ seam**.
 
 ## Architecture
 
-See [`docs/00-architecture-diagram.md`](docs/00-architecture-diagram.md) for the
-full diagram. In short: a **supervisor** delegates **sequentially** to four
+![CaseSentinel architecture](docs/casesentinel-architecture.png)
+
+See [`docs/00-architecture-diagram.md`](docs/00-architecture-diagram.md) for a
+Mermaid version. In short: a **supervisor** delegates **sequentially** to four
 specialized sub-agents, guards the risky one, recovers from failure, and logs every
 step to an append-only audit trail. No agent takes a binding action.
 
