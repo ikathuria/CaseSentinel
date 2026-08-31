@@ -128,8 +128,8 @@ Agent Identity to enforce the FERPA caseload boundary.
 
 ## Try it out
 - **Repo:** https://github.com/ikathuria/CaseSentinel
+- **Live app (Cloud Run):** https://casesentinel-285407834862.us-central1.run.app
 - **Demo video:** [VIDEO URL]
-- **Live app (Cloud Run):** [CLOUD RUN URL]
 - Runs locally in minutes (offline, no API key) — see the README.
 
 ---
@@ -166,5 +166,5 @@ Agent Identity to enforce the FERPA caseload boundary.
 - [x] Public repo with step-by-step README.
 - [x] Architecture diagram.
 - [x] Synthetic data only (stated explicitly).
-- [ ] Hosted URL — deploy with the README steps, then paste **[CLOUD RUN URL]**.
+- [x] **Hosted URL** — https://casesentinel-285407834862.us-central1.run.app (live on Cloud Run + Firestore; verified end-to-end with live Gemini 3.5).
 - [ ] ≤4-min public demo video — record with `docs/04-video-script.md`, then paste **[VIDEO URL]**.

@@ -10,6 +10,8 @@ a named human approved every consequential action**.
 Built for the **All Things Agentic** hackathon (Google / Devpost) — track: Fortified
 Enterprise Fleet. Stack: **Google ADK 2.8 + Gemini 3.5 + Cloud Run + Firestore**.
 
+🔗 **Live demo (Cloud Run):** https://casesentinel-285407834862.us-central1.run.app
+
 > ⚠️ **Synthetic data only.** CaseSentinel ships with a generated fake district
 > (Willow Creek USD) and **never** uses real student records. For special education
 > — where PII handling is the core risk — synthetic-only is a maturity signal, not a
@@ -205,4 +207,4 @@ apps/api/.venv/bin/python -m casesentinel.data.generate
 | M2 — five-agent pipeline + approval gate | ✅ |
 | M3 — failure-recovery subsystem | ✅ |
 | M4 — director dashboard (live) | ✅ |
-| M5 — deploy-ready + docs | ✅ (live Cloud Run deploy + demo video: run the steps above with your GCP account) |
+| M5 — deploy-ready + docs | ✅ **live on Cloud Run + Firestore** (https://casesentinel-285407834862.us-central1.run.app); demo video pending |
