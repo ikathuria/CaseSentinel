@@ -1,12 +1,15 @@
 """Heuristic output judge for drafted IEP goals.
 
-Catches the two most common failure modes of an LLM drafter that the competitor
-research flagged as unserved (RESEARCH.md): a goal written for the *wrong student*
-(the real "copy-and-paste another kid's name" defect) and a *non-measurable* goal
-("A goal can pass every required-field check and still be unmeasurable").
+Catches the two failure modes the competitor research flagged as unserved
+(RESEARCH.md): a goal written for the *wrong student* (the real "copy-and-paste
+another kid's name" defect) and a *non-measurable* goal ("A goal can pass every
+required-field check and still be unmeasurable").
 
-M0 uses cheap heuristics; M3 can add a second-model judge behind the same
-``judge_goal`` signature.
+Detection is intentionally robust against real LLM prose: it checks that the goal
+names the expected student and states a numeric criterion, rather than trying to
+recognize arbitrary names (which false-positives on capitalized phrases like
+"Reading Goal"). A goal about a different student fails the "names the expected
+student" check; M3 can add a second-model judge behind the same signature.
 """
 
 from __future__ import annotations
@@ -14,13 +17,15 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-# Signals that a goal is measurable: a number, percent, ratio, or an explicit criterion word.
+# A goal is "measurable" if it states a numeric criterion in any common form.
 _MEASURABLE = re.compile(
-    r"(\d+\s?%|\b\d+\s?(?:wpm|words|problems|trials|out of|/)\b|\bpercent\b|\baccuracy\b|\bby\s+\d)",
+    r"(\d+\s?%"
+    r"|\bpercent\b|\baccuracy\b"
+    r"|\b\d+\s?(?:wpm|wcpm|words|word|minute|minutes|problems|trials|times|questions|sentences)\b"
+    r"|\b\d+\s*(?:of|out of|/)\s*\d+\b"
+    r"|\bby\s+\w+\s+\d{4}\b)",
     re.IGNORECASE,
 )
-# Rough proper-name detector (Titlecase word pairs), used to spot a foreign student name.
-_NAME = re.compile(r"\b([A-Z][a-z]+)\s+([A-Z][a-z]+)\b")
 
 
 @dataclass
@@ -39,14 +44,9 @@ def judge_goal(text: str, *, expected_student: str) -> Verdict:
 
     first_name = expected_student.split()[0].lower()
     if first_name not in body.lower():
+        # A goal that doesn't name the expected student is either generic
+        # boilerplate or written for someone else — both unacceptable.
         reasons.append(f"does not mention the student ({expected_student})")
-
-    # A full name that is not the expected student => likely another student's data.
-    for a, b in _NAME.findall(body):
-        full = f"{a} {b}"
-        if full.lower() != expected_student.lower() and a.lower() != first_name:
-            reasons.append(f"references a different student's name ({full})")
-            break
 
     if not _MEASURABLE.search(body):
         reasons.append("goal is not measurable (no numeric criterion)")

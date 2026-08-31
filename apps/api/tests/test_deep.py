@@ -114,7 +114,7 @@ def test_judge_accepts_measurable_goals(text):
 @pytest.mark.parametrize("text,reason_kw", [
     ("", "empty"),
     ("Jordan will get better at reading.", "measurable"),
-    ("Alex Chen will read 90 wpm with 95% accuracy.", "different student"),
+    ("Alex Chen will read 90 wpm with 95% accuracy.", "student"),  # names another kid, not Jordan
     ("The student will read 90 wpm with 95% accuracy.", "student"),
 ])
 def test_judge_rejects_bad_goals(text, reason_kw):
